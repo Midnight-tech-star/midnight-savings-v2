@@ -1,0 +1,453 @@
+// ============================================================================
+// MIDNIGHT SAVINGS 💯 - GROUP CREATION UI & MANAGEMENT SYSTEM
+// Complete Full-Stack Implementation
+// ============================================================================
+
+// ============================================================================
+// 1. FRONTEND - GROUP CREATION UI COMPONENT
+// ============================================================================
+
+// ---- index.html (Main Template) ----
+const groupCreationHTML = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Midnight Savings 💯 - Group Management</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation & Header -->
+        <nav class="navbar">
+            <div class="nav-content">
+                <div class="logo-section">
+                    <span class="logo">🌙 Midnight Savings 💯</span>
+                </div>
+                <div class="nav-links">
+                    <span id="userName" class="user-name"></span>
+                    <button id="logoutBtn" class="btn-logout">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- GROUP CREATION SECTION -->
+            <section class="group-creation-section" id="groupCreationSection">
+                <div class="section-header">
+                    <h1>Group Setup</h1>
+                    <p class="subtitle">Configure your Midnight Savings 💯 group</p>
+                </div>
+
+                <div class="form-container">
+                    <!-- Group Name Input -->
+                    <div class="form-group">
+                        <label for="groupNameInput">Group Name</label>
+                        <input 
+                            type="text" 
+                            id="groupNameInput" 
+                            class="input-text" 
+                            value="Midnight Savings 💯"
+                            placeholder="Enter group name"
+                            aria-label="Group name"
+                        >
+                    </div>
+
+                    <!-- Current Group Name Display (Read-only) -->
+                    <div class="display-group">
+                        <label>Current Group Name</label>
+                        <p class="current-group-name" aria-live="polite" aria-label="Current group name">
+                            Midnight Savings 💯
+                        </p>
+                    </div>
+
+                    <!-- Contribution Amount Input -->
+                    <div class="form-group">
+                        <label for="contributionAmountInput">Weekly Contribution Amount</label>
+                        <div class="input-with-suffix">
+                            <input 
+                                type="number" 
+                                id="contributionAmountInput" 
+                                min="0" 
+                                value="740"
+                                class="input-number" 
+                                placeholder="Enter amount"
+                                aria-label="Contribution amount"
+                            >
+                            <span class="input-suffix">KSh</span>
+                        </div>
+                    </div>
+
+                    <!-- Update Contribution Button -->
+                    <div class="form-group">
+                        <button 
+                            id="updateContributionBtn" 
+                            type="button" 
+                            class="btn btn-primary"
+                            aria-label="Update contribution amount"
+                        >
+                            Update Contribution
+                        </button>
+                    </div>
+
+                    <!-- Join Group Button (Conditional) -->
+                    <div id="joinGroupContainer" style="display: none;">
+                        <button 
+                            id="joinGroupBtn" 
+                            type="button" 
+                            class="btn btn-secondary"
+                            aria-label="Join group"
+                        >
+                            Join Group
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RULES SECTION -->
+            <section class="rules-section" id="rulesSection">
+                <div class="section-header">
+                    <h2>Group Rules & Guidelines</h2>
+                </div>
+                
+                <div class="tabs-container">
+                    <button 
+                        class="tab-button active" 
+                        id="rulesTabButton" 
+                        aria-selected="true" 
+                        aria-controls="rulesTab"
+                    >
+                        Rules
+                    </button>
+                </div>
+
+                <div 
+                    role="tabpanel" 
+                    id="rulesTab" 
+                    aria-labelledby="rulesTabButton"
+                    class="tab-content active"
+                >
+                    <div class="rules-content">
+                        <h3>Merry-Go-Round Rules</h3>
+                        <ul>
+                            <li>Weekly contributions are mandatory on Saturday by 9:00 PM</li>
+                            <li>Members receive payout on Sunday mornings according to their shares</li>
+                            <li>Early exits incur a 10% penalty</li>
+                            <li>All payments must be made to the Till Number: 3344034</li>
+                            <li>Member list is locked during active rounds</li>
+                        </ul>
+                    </div>
+
+                    <!-- Exit Group Button with Conditional Logic -->
+                    <div class="exit-group-container">
+                        <button 
+                            id="exitGroupBtn" 
+                            type="button" 
+                            class="btn btn-danger"
+                            aria-label="Exit group"
+                        >
+                            Exit Group
+                        </button>
+                        <span id="exitGroupStatus" class="status-message"></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ADMIN DASHBOARD SECTION -->
+            <section class="admin-dashboard" id="adminDashboard" style="display: none;">
+                <div class="section-header">
+                    <h2>Admin Dashboard</h2>
+                </div>
+
+                <!-- Pending Membership Requests -->
+                <div class="dashboard-card">
+                    <h3>Pending Membership Requests</h3>
+                    <div class="table-wrapper">
+                        <table id="pendingRequestsTable" class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Phone Number</th>
+                                    <th>Date Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingRequestsBody">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Members List -->
+                <div class="dashboard-card">
+                    <h3>Current Members</h3>
+                    <div class="member-list-scroll-container" style="overflow-y: auto; max-height: 400px;">
+                        <div id="membersList" class="member-list">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paid Members Ledger -->
+                <div class="dashboard-card">
+                    <h3>Paid Members Ledger (This Week)</h3>
+                    <div class="table-wrapper">
+                        <table id="paidMembersTable" class="data-table sortable">
+                            <thead>
+                                <tr>
+                                    <th>Member Name</th>
+                                    <th>Amount (KSh)</th>
+                                    <th>Payment Timestamp</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paidMembersBody">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Payout Confirmation Checklist -->
+                <div class="dashboard-card">
+                    <h3>Sunday Payout Confirmation</h3>
+                    <div class="payout-checklist">
+                        <div id="payoutChecklistContainer">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weekly Savings Report -->
+                <div class="dashboard-card">
+                    <h3>Weekly Savings Report</h3>
+                    <div class="report-controls">
+                        <input type="date" id="reportStartDate" class="input-date">
+                        <input type="date" id="reportEndDate" class="input-date">
+                        <button id="generateReportBtn" class="btn btn-secondary">Generate Report</button>
+                    </div>
+                    <div class="report-summary" id="reportSummary">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- MEMBER DASHBOARD SECTION -->
+            <section class="member-dashboard" id="memberDashboard">
+                <div class="section-header">
+                    <h2>My Savings Dashboard</h2>
+                </div>
+
+                <!-- Payment Status -->
+                <div class="dashboard-card">
+                    <h3>Payment Status</h3>
+                    <div class="status-indicator" id="paymentStatusIndicator">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Countdown Timer -->
+                <div class="dashboard-card">
+                    <h3>Payment Deadline</h3>
+                    <div class="countdown-container">
+                        <span class="deadline-label">Deadline: Saturday 9:00 PM</span>
+                        <span id="countdownTimer" class="countdown-timer" aria-live="assertive">
+                            00:00:00
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Payment Info -->
+                <div class="dashboard-card payment-info-card">
+                    <h3>Payment Information</h3>
+                    <div class="payment-details">
+                        <div class="payment-detail-item">
+                            <span class="detail-label">Treasurer's Mobile:</span>
+                            <span class="detail-value">0713703322</span>
+                        </div>
+                        <div class="payment-detail-item">
+                            <span class="detail-label">M-Pesa Till No.:</span>
+                            <span class="detail-value">3344034</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Disbursement Info -->
+                <div class="dashboard-card">
+                    <h3>Disbursement Schedule</h3>
+                    <div class="disbursement-info">
+                        <p><strong>Payout Day:</strong> Every Sunday Morning</p>
+                        <p><strong>Eligibility:</strong> <span id="eligibilityStatus" class="status-eligible">Eligible</span></p>
+                        <p><strong>Your Shares:</strong> <span id="userShares">1</span></p>
+                        <p><strong>Expected Payout:</strong> <span id="expectedPayout">KSh 0</span></p>
+                    </div>
+                </div>
+
+                <!-- Transaction History -->
+                <div class="dashboard-card">
+                    <h3>Transaction History</h3>
+                    <div class="transaction-history" style="overflow-y: scroll; max-height: 300px;">
+                        <div id="transactionHistoryList">
+                            <!-- Dynamically populated -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- INITIAL PAYMENT FOR NEW MEMBERS -->
+            <section class="initial-payment-section" id="initialPaymentSection" style="display: none;">
+                <div class="section-header">
+                    <h1>Welcome to Midnight Savings 💯</h1>
+                    <p class="subtitle">Complete Your Initial Payment</p>
+                </div>
+
+                <div class="payment-form-container">
+                    <div class="payment-instructions">
+                        <h3>Initial Registration Payment</h3>
+                        <p>To activate your account, please make an initial payment of:</p>
+                        <div class="amount-display">100 KSh</div>
+                        <p class="small-text">This amount must be paid to Till Number: <strong>3344034</strong></p>
+                    </div>
+
+                    <div class="form-container">
+                        <div class="form-group">
+                            <label for="initialContributionInput">Payment Amount (KSh)</label>
+                            <input 
+                                type="number" 
+                                id="initialContributionInput" 
+                                value="100" 
+                                min="100" 
+                                readonly
+                                class="input-number"
+                                aria-label="Initial contribution amount"
+                            >
+                        </div>
+
+                        <button 
+                            id="submitInitialPaymentBtn" 
+                            type="submit" 
+                            class="btn btn-primary btn-large"
+                            aria-label="Submit initial payment"
+                        >
+                            Proceed to Payment
+                        </button>
+                    </div>
+
+                    <div class="payment-proof-section">
+                        <h4>Upload Payment Proof</h4>
+                        <input 
+                            type="file" 
+                            id="paymentProofFile" 
+                            accept="image/*"
+                            class="file-input"
+                            aria-label="Payment proof image"
+                        >
+                        <button 
+                            id="uploadProofBtn" 
+                            type="button" 
+                            class="btn btn-secondary"
+                        >
+                            Upload Proof
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    
+    <!-- Exit Confirmation Modal -->
+    <div id="exitConfirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Exit Group Confirmation</h2>
+                <button class="modal-close" data-modal="exitConfirmationModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-box">
+                    <span class="warning-icon">⚠️</span>
+                    <p id="exitWarningMessage"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close" data-modal="exitConfirmationModal">Cancel</button>
+                <button id="confirmExitBtn" class="btn btn-danger">Exit Group</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Dismissal Confirmation Modal -->
+    <div id="dismissalConfirmationModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Member Dismissal</h2>
+                <button class="modal-close" data-modal="dismissalConfirmationModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to dismiss <strong id="dismissalMemberName"></strong>?</p>
+                <p class="small-text">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close" data-modal="dismissalConfirmationModal">Cancel</button>
+                <button id="confirmDismissalBtn" class="btn btn-danger">Dismiss Member</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Handling Modal -->
+    <div id="requestHandlingModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Process Membership Request</h2>
+                <button class="modal-close" data-modal="requestHandlingModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="requestDetails">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close" data-modal="requestHandlingModal">Cancel</button>
+                <button id="acceptRequestBtn" class="btn btn-success">Accept</button>
+                <button id="rejectRequestBtn" class="btn btn-danger">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Closure Modal -->
+    <div id="accountClosureModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Close Account</h2>
+                <button class="modal-close" data-modal="accountClosureModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="warning-box danger">
+                    <span class="warning-icon">🛑</span>
+                    <p><strong>WARNING:</strong> No compensation will be provided before the term end.</p>
+                </div>
+                <p>Type "CONFIRM" to close your account:</p>
+                <input 
+                    type="text" 
+                    id="closureConfirmationInput" 
+                    placeholder="Type CONFIRM"
+                    class="input-text"
+                >
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary modal-close" data-modal="accountClosureModal">Cancel</button>
+                <button id="confirmClosureBtn" class="btn btn-danger" disabled>Close Account</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+`;
+
+module.exports = { groupCreationHTML };
